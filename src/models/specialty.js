@@ -19,10 +19,6 @@ const specialtySchema = new mongoose.Schema({
     type: String,
     required: [true, "El código es obligatorio"],
     match: [/^[A-Z]{3}-\d{2}$/, "El código debe tener el formato ABC-01"],
-    validate: {
-      validator: (value) => value % 15 === 0,
-      message: (props) => `${props.value} no es múltiplo de 15 minutos`,
-    },
   },
   description: {
     type: String,
@@ -43,6 +39,10 @@ const specialtySchema = new mongoose.Schema({
     default: 30,
     min: [15, "La consulta dura al menos 15 minutos"],
     max: [120, "La consulta dura como máximo 120 minutos"],
+    validate: {
+      validator: (value) => value % 15 === 0,
+      message: (props) => `${props.value} no es múltiplo de 15 minutos`,
+    },
   },
   contactEmail: {
     type: String,
