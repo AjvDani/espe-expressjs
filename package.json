@@ -2,7 +2,7 @@
   "name": "espe-expressjs",
   "version": "1.0.0",
   "description": "Clase de expressjs",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
