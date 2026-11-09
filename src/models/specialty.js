@@ -56,6 +56,15 @@ const specialtySchema = new mongoose.Schema({
   },
 });
 
+specialtySchema.virtual("info").get(function () {
+  return `${this.name} (${this.code}): consulta de ${this.durationMinutes} minutos`;
+});
+specialtySchema.virtual("label").set(function (value) {
+  const [code, ...rest] = value.split(" - ");
+  this.code = code;
+  this.name = rest.join(" - ");
+});
+
 specialtySchema.pre("validate", function () {
   if (this.name) {
     this.slug = slugify(this.name, { lower: true, strict: true });
