@@ -2509,6 +2509,354 @@
           }
         }
       ]
+    },
+    {
+      "name": "7-Especialidades",
+      "description": "CRUD de especialidades (MongoDB). Cada ejecucion crea una especialidad nueva con nombre unico.",
+      "item": [
+        {
+          "name": "Listar especialidades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear especialidad valida",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.collectionVariables.set(\"specialtyName\", \"Especialidad Postman \" + ts);",
+                  "pm.collectionVariables.set(\"specialtySlug\", \"especialidad-postman-\" + ts);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test(\"Tiene _id y slug\", () => { pm.expect(b._id).to.be.a(\"string\"); pm.expect(b.slug).to.eql(pm.collectionVariables.get(\"specialtySlug\")); });",
+                  "pm.test(\"Aplica defaults\", () => { pm.expect(b.area).to.eql(\"clinica\"); pm.expect(b.durationMinutes).to.eql(30); });",
+                  "pm.collectionVariables.set(\"specialtyId\", b._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{specialtyName}}\",\n  \"code\": \"POS-01\",\n  \"description\": \"Atencion especializada creada desde Postman para validar el endpoint de especialidades.\",\n  \"contactEmail\": \"postman@espe.edu.ec\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar incluye la nueva",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Contiene la especialidad creada\", () => pm.expect(pm.response.json().map(s => s._id)).to.include(pm.collectionVariables.get(\"specialtyId\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ver por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test(\"Es la misma especialidad\", () => { pm.expect(b._id).to.eql(pm.collectionVariables.get(\"specialtyId\")); pm.expect(b.name).to.eql(pm.collectionVariables.get(\"specialtyName\")); });",
+                  "pm.test(\"Incluye virtual info\", () => pm.expect(b.info).to.eql(b.name + \" (POS-01): consulta de 30 minutos\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties/{{specialtyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties",
+                "{{specialtyId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Nombre repetido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje ya existe\", () => pm.expect(pm.response.json().errors.join(\" \")).to.include(\"ya existe\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{specialtyName}}\",\n  \"code\": \"POS-02\",\n  \"description\": \"Atencion especializada creada desde Postman para validar el endpoint de especialidades.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "[validacion] Datos invalidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "const e = pm.response.json().errors;",
+                  "pm.test(\"Valida codigo, descripcion, area, duracion y correo\", () => {",
+                  "  pm.expect(e).to.include(\"El código debe tener el formato ABC-01\");",
+                  "  pm.expect(e).to.include(\"No se cumple la longitud mínima de 50\");",
+                  "  pm.expect(e).to.include(\"El área otra no es válida\");",
+                  "  pm.expect(e).to.include(\"20 no es múltiplo de 15 minutos\");",
+                  "  pm.expect(e).to.include(\"El correo de contacto no es válido\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invalida Postman\",\n  \"code\": \"abc\",\n  \"description\": \"corta\",\n  \"area\": \"otra\",\n  \"durationMinutes\": 20,\n  \"contactEmail\": \"no-es-correo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "[validacion] Sin campos obligatorios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "const e = pm.response.json().errors;",
+                  "pm.test(\"Pide nombre y codigo\", () => { pm.expect(e).to.include(\"El nombre es obligatorio\"); pm.expect(e).to.include(\"El código es obligatorio\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ver id inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties/000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties",
+                "000000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ver id mal formado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/specialties/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "specialties",
+                "abc"
+              ]
+            }
+          }
+        }
+      ]
     }
   ]
 }
