@@ -1,4 +1,5 @@
 const { createSpecialtyService } = require("../services/specialtyService");
+const { listSpecialitiesService } = require("../services/specialtyService");
 
 const handleError = (res, error) => {
   if (error.name === "ValidationError") {
@@ -22,4 +23,13 @@ const createSpecialty = async (req, res) => {
   }
 };
 
-module.exports = { createSpecialty };
+const listSpecialty = async (req, res) => {
+  try {
+    const specialty = await listSpecialitiesService(req.body);
+    res.json(specialty);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+module.exports = { createSpecialty, listSpecialty };
