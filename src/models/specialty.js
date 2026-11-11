@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 const { isEmail } = require("validator"); // arriba del archivo
 
 const specialtySchema = new mongoose.Schema({
@@ -49,5 +50,25 @@ const specialtySchema = new mongoose.Schema({
     validate: [isEmail, "El correo de contacto no es válido"],
   },
   createdAt: Date,
+  slug: {
+    type: String,
+    required: true,
+  },
 });
+
+specialtySchema.virtual("info").get(function () {
+  return `${this.name} (${this.code}): consulta de ${this.durationMinutes} minutos`;
+});
+specialtySchema.virtual("label").set(function (value) {
+  const [code, ...rest] = value.split(" - ");
+  this.code = code;
+  this.name = rest.join(" - ");
+});
+
+specialtySchema.pre("validate", function () {
+  if (this.name) {
+    this.slug = slugify(this.name, { lower: true, strict: true });
+  }
+});
+
 module.exports = mongoose.model("Specialty", specialtySchema);
