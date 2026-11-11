@@ -1,5 +1,5 @@
-const { createSpecialtyService } = require("../services/specialtyService");
-const { listSpecialitiesService } = require("../services/specialtyService");
+const { createSpecialtyService, listSpecialtiesService, getSpecialtiesService, updateSpecialtyService, deleteSpecialtyService } = require("../services/specialtyService");
+
 
 const handleError = (res, error) => {
   if (error.name === "ValidationError") {
@@ -25,11 +25,51 @@ const createSpecialty = async (req, res) => {
 
 const listSpecialty = async (req, res) => {
   try {
-    const specialty = await listSpecialitiesService(req.body);
+    const specialty = await listSpecialtiesService();
     res.json(specialty);
   } catch (error) {
     handleError(res, error);
   }
 };
 
-module.exports = { createSpecialty, listSpecialty };
+const getSpecialty = async (req, res) => {
+  try {
+    const specialty = await getSpecialtiesService(req.params.id);
+    if (!specialty) {
+      return res.status(404).json({ error: "Especialidad no encontrada" });
+    }
+    res.json(specialty.toJSON({ virtuals: true }));
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const updateSpecialty = async (req, res) => {
+  try {
+    const specialty = await updateSpecialtyService(req.params.id, req.body);
+    if (!specialty) {
+      return res.status(404).json({ error: "Especialidad no encontrada" });
+    }
+    res.json(specialty);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const deleteSpecialty = async (req, res) => {
+  try {
+    const specialty = await deleteSpecialtyService(req.params.id);
+    if (!specialty) {
+      return res.status(404).json({ error: "Especialidad no encontrada" });
+    }
+    res.json(specialty.toJSON({ virtuals: true }));
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+
+
+module.exports = { createSpecialty, listSpecialty, getSpecialty, updateSpecialty, deleteSpecialty };
+
+
