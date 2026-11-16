@@ -1,5 +1,8 @@
 const Speciality = require("../models/specialty");
 
+// Campos que el cliente puede modificar (slug se genera solo; _id y createdAt no se tocan).
+const UPDATABLE_FIELDS = ["name", "code", "description", "area", "durationMinutes", "contactEmail"];
+
 const createSpecialtyService = async (data) => {
   return await Speciality.create(data);
 };
@@ -17,7 +20,11 @@ const getSpecialtiesService = async (id) => {
 const updateSpecialtyService = async (id, data) => {
     const specialty = await Speciality.findById(id);
     if (!specialty) return null;
-    specialty.set(data);
+    for(const field of UPDATABLE_FIELDS) {
+        if(data[field] !== undefined) {
+            specialty.set(field, data[field]);
+        }
+    }
     return await specialty.save();
 };
 
