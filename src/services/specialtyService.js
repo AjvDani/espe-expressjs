@@ -32,4 +32,11 @@ const deleteSpecialtyService = async (id) => {
     return await Speciality.findByIdAndDelete(id);
 };
 
-module.exports = { createSpecialtyService, listSpecialtiesService, getSpecialtiesService, updateSpecialtyService, deleteSpecialtyService };
+// Valores permitidos del enum "area" definidos en el modelo.
+const isValidArea = (area) => Speciality.schema.path("area").enumValues.includes(area);
+
+const deleteByAreaService = async (area) => {
+    return await Speciality.deleteMany({ area });
+};
+
+module.exports = { createSpecialtyService, listSpecialtiesService, getSpecialtiesService, updateSpecialtyService, deleteSpecialtyService, deleteByAreaService, isValidArea };

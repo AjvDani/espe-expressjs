@@ -1,4 +1,4 @@
-const { createSpecialtyService, listSpecialtiesService, getSpecialtiesService, updateSpecialtyService, deleteSpecialtyService } = require("../services/specialtyService");
+const { createSpecialtyService, listSpecialtiesService, getSpecialtiesService, updateSpecialtyService, deleteSpecialtyService, deleteByAreaService, isValidArea } = require("../services/specialtyService");
 
 
 const handleError = (res, error) => {
@@ -68,8 +68,26 @@ const deleteSpecialty = async (req, res) => {
   }
 };
 
+// DELETE /area/:area — borra todas las especialidades de un área
+// (clinica, quirurgica, diagnostico).
+const deleteByArea = async (req, res) => {
+  const { area } = req.params;
+  if (!isValidArea(area)) {
+    return res.status(400).json({ error: `Área inválida: ${area}` });
+  }
+  try {
+    const result = await deleteByAreaService(area);
+    if (result.deletedCount === 0) {
+      return res
+        .status(404)
+        .json({ error: `No hay especialidades en el área ${area}` });
+    }
+    res.json({ area, deletedCount: result.deletedCount });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 
-
-module.exports = { createSpecialty, listSpecialty, getSpecialty, updateSpecialty, deleteSpecialty };
+module.exports = { createSpecialty, listSpecialty, getSpecialty, updateSpecialty, deleteSpecialty, deleteByArea };
 
 
