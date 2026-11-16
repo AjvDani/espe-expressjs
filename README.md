@@ -133,6 +133,11 @@ Una reserva se rechaza si ya existe otra con la misma fecha y el mismo bloque.
 | `GET` | `/specialties/:id` | Público | Muestra una especialidad, incluido el campo virtual `info` |
 | `POST` | `/specialties/:id` | Público | Actualiza una especialidad y regenera su `slug` |
 | `DELETE` | `/specialties/:id` | Público | Elimina una especialidad |
+| `DELETE` | `/specialties/area/:area` | Público | Elimina **todas** las especialidades de un área y devuelve cuántas borró |
+
+Al actualizar solo se cambian `name`, `code`, `description`, `area`, `durationMinutes` y `contactEmail`. Si el cuerpo trae otros campos, como `slug` o `_id`, se ignoran.
+
+Para borrar por área, `:area` debe ser `clinica`, `quirurgica` o `diagnostico`. Un área no válida responde `400`, y un área sin especialidades responde `404`.
 
 Reglas del modelo `Specialty`:
 
@@ -156,6 +161,8 @@ Los errores de validación responden `400` con la lista de mensajes en `errors`.
 3. Ejecuta las carpetas en orden con el Runner.
 
 La colección cubre rutas, autenticación, roles, autorización, reservas, historial y especialidades. Los usuarios y bloques que crea se quedan en la base de datos, porque la API no tiene rutas para borrarlos.
+
+> **Atención:** la carpeta **7-Especialidades** prueba el borrado por área con `DELETE /specialties/area/quirurgica`, que elimina todas las especialidades quirúrgicas de la base de datos a la que apunte `baseUrl`, no solo las que crea la colección. Ejecútala contra una base de datos de prueba si tienes especialidades quirúrgicas que quieras conservar.
 
 ## Estructura del proyecto
 
